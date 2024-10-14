@@ -24,24 +24,22 @@ api = Api(app)
 def index():
     return '<h1>Code challenge</h1>'
 
-# RESTful Resource Classes
-
 class RestaurantResource(Resource):
     def get(self, id=None):
         if id:
-            restaurant = Restaurant.query.get(id)
+            restaurant = db.session.get(Restaurant, id)
             if restaurant:
-                return make_response(restaurant.to_dict(serialize_only=('id', 'name', 'address', 'restaurant_pizzas')), 200)
+                return make_response(restaurant.to_dict(), 200)
             return make_response({"error": "Restaurant not found"}, 404)
         restaurants = Restaurant.query.all()
         return make_response([r.to_dict() for r in restaurants], 200)
 
     def delete(self, id):
-        restaurant = Restaurant.query.get(id)
+        restaurant = db.session.get(Restaurant, id)
         if restaurant:
             db.session.delete(restaurant)
             db.session.commit()
-            return make_response("", 204)  # No content to return
+            return make_response("", 204)
         return make_response({"error": "Restaurant not found"}, 404)
 
 class PizzaResource(Resource):
@@ -60,15 +58,13 @@ class RestaurantPizzaResource(Resource):
             restaurant_pizza = RestaurantPizza(price=price, pizza_id=pizza_id, restaurant_id=restaurant_id)
             db.session.add(restaurant_pizza)
             db.session.commit()
-            return make_response(restaurant_pizza.to_dict(), 201)  # Created
+            return make_response(restaurant_pizza.to_dict(), 201)
         except ValueError as e:
-            return make_response({"errors": [str(e)]}, 400)  # Bad request
+            return make_response({"errors": [str(e)]}, 400)
 
-# API Resource Routing
 api.add_resource(RestaurantResource, '/restaurants', '/restaurants/<int:id>')
 api.add_resource(PizzaResource, '/pizzas')
 api.add_resource(RestaurantPizzaResource, '/restaurant_pizzas')
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
-
