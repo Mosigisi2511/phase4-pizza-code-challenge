@@ -48,7 +48,7 @@ python server/app.py
 You can run your React app on [`localhost:4000`](http://localhost:4000) by
 running:
 
-```sh
+```npm start --prefix client
 npm start --prefix client
 ```
 
